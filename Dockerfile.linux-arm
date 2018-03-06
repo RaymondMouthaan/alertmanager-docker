@@ -1,0 +1,24 @@
+FROM arm32v6/alpine
+COPY tmp/qemu-arm-static /usr/bin/qemu-arm-static
+
+MAINTAINER Raymond Mouthaan <raymondmmouthaan@gmail.com>
+
+ARG ARCH=armv7
+ARG VERSION=0.15.0-rc.0
+
+RUN apk --no-cache add --virtual build-dependencies wget ca-certificates \
+    && mkdir -p /tmp/install /tmp/dist \
+    && wget -O /tmp/install/alertmanager.tar.gz https://github.com/prometheus/alertmanager/releases/download/v$VERSION/alertmanager-$VERSION.linux-$ARCH.tar.gz \
+    && apk del build-dependencies \
+    && apk add --no-cache libc6-compat \
+    && cd /tmp/install \
+    && tar --strip-components=1 -xzf alertmanager.tar.gz \
+    && mv node_exporter /bin/alertmanager \
+    && rm -rf /tmp/install
+
+EXPOSE     9093
+VOLUME     [ "/alertmanager" ]
+WORKDIR    /alertmanager
+ENTRYPOINT [ "/bin/alertmanager" ]
+CMD        [ "--config.file=/etc/alertmanager/config.yml", \
+             "--storage.path=/alertmanager" ]
