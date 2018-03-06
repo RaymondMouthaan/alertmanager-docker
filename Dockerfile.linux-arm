@@ -16,7 +16,8 @@ RUN apk --no-cache add --virtual build-dependencies wget ca-certificates \
     && mv alertmanager /bin/alertmanager \
     && rm -rf /tmp/install
 
-COPY conf /etc/alertmanager/
+COPY conf /etc/alertmanager
+RUN chmod +x /etc/alertmanager/docker-entrypoint.sh
 
 EXPOSE     9093
 VOLUME     [ "/alertmanager" ]
